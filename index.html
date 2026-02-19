@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<!-- Ensure this file is named exactly index.html for GitHub Pages to work -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UK School Trainer - Secure Portal</title>
+    <!-- Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .hidden { display: none; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        /* Smooth transition for screens */
+        #login-screen, #app-screen { transition: opacity 0.3s ease; }
+    </style>
+</head>
+<body class="bg-indigo-50 min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 border border-slate-100">
+        <div class="text-center mb-8">
+            <div class="w-20 h-20 bg-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-indigo-100">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            </div>
+            <h1 class="text-3xl font-black text-slate-800 tracking-tight">Student Portal</h1>
+            <p class="text-slate-500 mt-2 font-medium">Enter your credentials</p>
+        </div>
+
+        <form id="login-form" class="space-y-5" onsubmit="handleLogin(event)">
+            <div class="relative">
+                <input type="text" id="login-name" required placeholder="Student Name (Rishika/Abhijit)" 
+                    class="w-full pl-6 pr-4 py-4 bg-slate-50 border-2 border-slate-100 focus:border-indigo-500 focus:bg-white rounded-2xl outline-none transition-all font-semibold text-slate-700">
+            </div>
+            <div class="relative">
+                <input type="password" id="login-pass" required placeholder="Password" 
+                    class="w-full pl-6 pr-4 py-4 bg-slate-50 border-2 border-slate-100 focus:border-indigo-500 focus:bg-white rounded-2xl outline-none transition-all font-semibold text-slate-700">
+            </div>
+            <div id="login-error" class="hidden flex items-center gap-2 text-red-500 text-sm font-bold bg-red-50 p-3 rounded-xl border border-red-100 animate-pulse">
+                <span>Invalid name or password</span>
+            </div>
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-5 rounded-2xl shadow-lg shadow-indigo-200 transition-all transform active:scale-95">
+                Login & Start
+            </button>
+        </form>
+    </div>
+
+    <!-- MAIN APP SCREEN -->
+    <div id="app-screen" class="hidden max-w-md w-full">
+        <div class="flex items-center justify-between mb-4 px-2">
+            <div class="flex flex-col">
+                <span id="display-user-name" class="font-black text-indigo-600 leading-none text-lg"></span>
+                <span id="display-user-level" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest"></span>
+            </div>
+            <button onclick="location.reload()" class="text-xs font-bold text-slate-400 hover:text-red-500 flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                SIGN OUT
+            </button>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100">
+            <div id="header-bg" class="p-6 text-white text-center bg-indigo-600 transition-colors duration-500">
+                <div id="subject-header">
+                    <h2 class="text-xl font-black">Choose Your Test</h2>
+                    <p class="text-[10px] font-bold text-indigo-300 uppercase tracking-widest mt-1">30 Question Assessment</p>
+                </div>
+                <div id="quiz-header" class="hidden">
+                    <div class="flex justify-between items-center text-xs font-mono mb-2">
+                        <span id="q-counter" class="bg-indigo-700 px-2 py-1 rounded font-bold uppercase tracking-tighter"></span>
+                        <span id="timer-display" class="flex items-center gap-1 px-2 py-1 rounded bg-indigo-700 font-bold"></span>
+                    </div>
+                    <div class="w-full bg-indigo-800 h-2 rounded-full overflow-hidden">
+                        <div id="progress-fill" class="bg-white h-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="card-content" class="p-8 max-h-[70vh] overflow-y-auto">
+                <div id="subject-selection" class="grid grid-cols-1 gap-4 py-2">
+                    <button onclick="startTest('math')" class="flex items-center gap-4 p-6 rounded-2xl border-2 border-slate-100 hover:border-blue-500 hover:bg-blue-50 transition-all text-left group">
+                        <div class="p-4 bg-blue-100 rounded-2xl text-blue-600 group-hover:scale-110 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" x2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="font-black text-slate-800 text-lg">Mathematics</h3>
+                            <p class="text-xs text-slate-400 font-bold uppercase tracking-tighter">30 Questions • 30 Mins</p>
+                        </div>
+                    </button>
+                    <button onclick="startTest('english')" class="flex items-center gap-4 p-6 rounded-2xl border-2 border-slate-100 hover:border-purple-500 hover:bg-purple-50 transition-all text-left group">
+                        <div class="p-4 bg-purple-100 rounded-2xl text-purple-600 group-hover:scale-110 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="font-black text-slate-800 text-lg">English Literacy</h3>
+                            <p class="text-xs text-slate-400 font-bold uppercase tracking-tighter">30 Questions • 30 Mins</p>
+                        </div>
+                    </button>
+                </div>
+
+                <div id="quiz-engine" class="hidden space-y-6">
+                    <div id="question-text" class="text-xl font-black text-center py-6 leading-relaxed text-slate-700 italic min-h-[120px] flex items-center justify-center text-pretty"></div>
+                    
+                    <div id="input-ui" class="hidden space-y-4">
+                        <input type="text" id="answer-input" placeholder="Type answer..." 
+                            class="w-full p-6 rounded-2xl border-4 border-slate-100 focus:border-indigo-500 outline-none text-center text-3xl font-black text-indigo-600 uppercase">
+                        <button onclick="submitAnswer()" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-black shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95">SUBMIT</button>
+                    </div>
+
+                    <div id="mcq-ui" class="hidden grid grid-cols-1 gap-3"></div>
+                </div>
+
+                <div id="result-screen" class="hidden text-center space-y-6">
+                    <div class="p-8 bg-yellow-50 rounded-full w-24 h-24 flex items-center justify-center mx-auto text-yellow-600 animate-bounce">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                    </div>
+                    <div class="bg-slate-50 p-6 rounded-3xl border-2 border-slate-100">
+                        <div id="score-text" class="text-6xl font-black text-indigo-600 tracking-tighter"></div>
+                        <p id="percentage-text" class="text-xs text-slate-400 font-black uppercase mt-2 tracking-widest"></p>
+                    </div>
+                    <div class="space-y-3">
+                        <button onclick="showReview()" class="w-full bg-slate-800 text-white p-5 rounded-2xl font-black hover:bg-slate-900 shadow-lg flex items-center justify-center gap-2 transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                            REVIEW RESPONSES
+                        </button>
+                        <button onclick="location.reload()" class="w-full bg-indigo-50 text-indigo-600 p-5 rounded-2xl font-black hover:bg-indigo-100 transition-all">BACK TO MENU</button>
+                    </div>
+                </div>
+
+                <div id="review-screen" class="hidden space-y-4 pb-4">
+                    <div id="review-list" class="space-y-4"></div>
+                    <button onclick="location.reload()" class="w-full bg-indigo-600 text-white p-5 rounded-2xl font-black uppercase shadow-xl mt-6">Finish Review</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // User database
+        const USERS = { 
+            "Rishika": { level: "ks2", pass: "RK1234" }, 
+            "Abhijit": { level: "ks1", pass: "RK1234" } 
+        };
+        
+        // Comprehensive Question Bank
+        const banks = {
+            ks1math: [
+                { q: "What is 10 + 5?", a: "15", type: "input" },
+                { q: "What is half of 20?", a: "10", type: "input" },
+                { q: "Double 6 is...", a: "12", type: "input" },
+                { q: "Which is the smallest number?", o: ["12", "5", "19", "8"], a: 1, type: "mcq" },
+                { q: "How many cm in a metre?", a: "100", type: "input" },
+                { q: "What is 5 x 5?", a: "25", type: "input" },
+                { q: "Half of 100 is...", a: "50", type: "input" },
+                { q: "What is 30 + 40?", a: "70", type: "input" },
+                { q: "Double 25 is...", a: "50", type: "input" },
+                { q: "How many hours in a day?", a: "24", type: "input" },
+                { q: "What is 20 - 7?", a: "13", type: "input" },
+                { q: "How many sides does a triangle have?", a: "3", type: "input" },
+                { q: "What is 2 + 2 + 2?", a: "6", type: "input" },
+                { q: "10 more than 45 is...", a: "55", type: "input" },
+                { q: "What is 10 x 3?", a: "30", type: "input" },
+                { q: "How many pennies in £1?", a: "100", type: "input" },
+                { q: "Shape with 4 equal sides?", o: ["Circle", "Triangle", "Square"], a: 2, type: "mcq" },
+                { q: "What is 15 + 15?", a: "30", type: "input" },
+                { q: "What is 10 divided by 2?", a: "5", type: "input" },
+                { q: "Which is more: 25 or 52?", a: "52", type: "input" },
+                { q: "What is 100 - 1?", a: "99", type: "input" },
+                { q: "Months in a year?", a: "12", type: "input" },
+                { q: "What is 9 + 9?", a: "18", type: "input" },
+                { q: "10 less than 70?", a: "60", type: "input" },
+                { q: "How many legs on 3 cats?", a: "12", type: "input" },
+                { q: "What is 5 x 2?", a: "10", type: "input" },
+                { q: "20 plus 20?", a: "40", type: "input" },
+                { q: "Days in a week?", a: "7", type: "input" },
+                { q: "What is 11 + 4?", a: "15", type: "input" },
+                { q: "Half of 14?", a: "7", type: "input" },
+                { q: "What is 2 x 8?", a: "16", type: "input" },
+                { q: "How many corners on a square?", a: "4", type: "input" },
+                { q: "What is 50 + 50?", a: "100", type: "input" },
+                { q: "Double 10 is?", a: "20", type: "input" },
+                { q: "What is 16 - 6?", a: "10", type: "input" }
+            ],
+            ks2math: [
+                { q: "Work out 2356 + 2346.", a: "4702", type: "input" },
+                { q: "What is 20% of 205?", a: "41", type: "input" },
+                { q: "672 ÷ 8 =", a: "84", type: "input" },
+                { q: "3/4 of 32 =", a: "24", type: "input" },
+                { q: "9² + 3³ =", a: "108", type: "input" },
+                { q: "Square root of 144?", a: "12", type: "input" },
+                { q: "Solve: 4y - 10 = 30", a: "10", type: "input" },
+                { q: "Roman Numeral for 50?", a: "L", type: "input" },
+                { q: "15% of 60?", a: "9", type: "input" },
+                { q: "7 cubed (7³)?", a: "343", type: "input" },
+                { q: "ml in 2.5 litres?", a: "2500", type: "input" },
+                { q: "Area of 8cm x 5cm rectangle?", a: "40", type: "input" },
+                { q: "0.25 as a fraction?", o: ["1/2", "1/4", "1/5", "3/4"], a: 1, type: "mcq" },
+                { q: "Sum of angles in a triangle?", a: "180", type: "input" },
+                { q: "1.2 x 100?", a: "120", type: "input" },
+                { q: "Prime number between 10-15?", a: "13", type: "input" },
+                { q: "1000 - 345 =", a: "655", type: "input" },
+                { q: "Degrees in a right angle?", a: "90", type: "input" },
+                { q: "1/5 of 100?", a: "20", type: "input" },
+                { q: "Perimeter of 6cm square?", a: "24", type: "input" },
+                { q: "25 x 4 =", a: "100", type: "input" },
+                { q: "Grams in 1.2kg?", a: "1200", type: "input" },
+                { q: "What is 456 + 789?", a: "1245", type: "input" },
+                { q: "3/5 of 50?", a: "30", type: "input" },
+                { q: "What is 11²?", a: "121", type: "input" },
+                { q: "0.5 x 0.5?", a: "0.25", type: "input" },
+                { q: "Seconds in 5 minutes?", a: "300", type: "input" },
+                { q: "9 x 12 =", a: "108", type: "input" },
+                { q: "What is 10% of 450?", a: "45", type: "input" },
+                { q: "Difference between 100 and 42?", a: "58", type: "input" },
+                { q: "How many sides in a hexagon?", a: "6", type: "input" },
+                { q: "8 x 7 =", a: "56", type: "input" },
+                { q: "What is 2/3 of 18?", a: "12", type: "input" },
+                { q: "Roman Numeral for 100?", a: "C", type: "input" },
+                { q: "Square root of 81?", a: "9", type: "input" }
+            ],
+            ks1english: [
+                { q: "Plural of 'dog'?", a: "dogs", type: "input" },
+                { q: "Opposite of 'hot'?", a: "cold", type: "input" },
+                { q: "Fix the spelling: 'Skoool'", a: "school", type: "input" },
+                { q: "Rhyme with 'cat'?", o: ["cot", "bat", "car"], a: 1, type: "mcq" },
+                { q: "Opposite of 'Up'?", a: "down", type: "input" },
+                { q: "Which is a noun?", o: ["Run", "Apple", "Quickly"], a: 1, type: "mcq" },
+                { q: "Capital needed for: 'london'", a: "London", type: "input" },
+                { q: "A, E, I, O and ... are vowels.", a: "U", type: "input" },
+                { q: "Baby cat?", a: "kitten", type: "input" },
+                { q: "Past tense of 'play'?", a: "played", type: "input" },
+                { q: "Add 'ing' to 'hop'?", a: "hopping", type: "input" },
+                { q: "Describes a person?", o: ["Blue", "Kind", "Table"], a: 1, type: "mcq" },
+                { q: "Full stop goes at the ...", a: "end", type: "input" },
+                { q: "Opposite of 'Big'?", a: "small", type: "input" },
+                { q: "Sun + flower = ...", a: "sunflower", type: "input" },
+                { q: "Which is a question?", o: ["I am happy.", "How are you?", "Go away."], a: 1, type: "mcq" },
+                { q: "Plural of 'bus'?", a: "buses", type: "input" },
+                { q: "Rhyme for 'Moon'?", o: ["Sun", "Spoon", "Star"], a: 1, type: "mcq" },
+                { q: "First letter of alphabet?", a: "A", type: "input" },
+                { q: "Word meaning 'look' (sea/see)?", a: "see", type: "input" },
+                { q: "Opposite of 'Day'?", a: "night", type: "input" },
+                { q: "Color of grass?", a: "green", type: "input" },
+                { q: "A person who teaches?", a: "teacher", type: "input" },
+                { q: "Sound a cow makes?", a: "moo", type: "input" },
+                { q: "Past of 'run'?", a: "ran", type: "input" },
+                { q: "Plural of 'foot'?", a: "feet", type: "input" },
+                { q: "Opposite of 'Fast'?", a: "slow", type: "input" },
+                { q: "What do you do with a book?", a: "read", type: "input" },
+                { q: "Rhyme for 'Cake'?", o: ["Bike", "Bake", "Book"], a: 1, type: "mcq" },
+                { q: "Missing letter: C_t (animal)", a: "a", type: "input" },
+                { q: "Opposite of 'Sad'?", a: "happy", type: "input" },
+                { q: "How many letters in 'Pink'?", a: "4", type: "input" },
+                { q: "Fix spelling: 'Hous'", a: "house", type: "input" },
+                { q: "Capital for the word 'i'?", a: "I", type: "input" },
+                { q: "Opposite of 'Cold'?", a: "hot", type: "input" }
+            ],
+            ks2english: [
+                { q: "Word class of 'quickly'?", a: "adverb", type: "input" },
+                { q: "Synonym for 'happy'?", o: ["Sad", "Jovial", "Angry"], a: 1, type: "mcq" },
+                { q: "Fix: 'Accomodation'", a: "accommodation", type: "input" },
+                { q: "Prefix meaning 'against'?", a: "anti", type: "input" },
+                { q: "Plural of 'Mouse'?", a: "mice", type: "input" },
+                { q: "Which is a conjunction?", o: ["Blue", "Because", "Jumped"], a: 1, type: "mcq" },
+                { q: "Similes use 'as' or ...", a: "like", type: "input" },
+                { q: "Antonym of 'ancient'?", a: "modern", type: "input" },
+                { q: "Word with silent 'k'?", a: "knee", type: "input" },
+                { q: "Proper noun example?", o: ["Car", "France", "Running"], a: 1, type: "mcq" },
+                { q: "Punctuation for lists?", a: "comma", type: "input" },
+                { q: "Suffix for 'happily'?", a: "ly", type: "input" },
+                { q: "Spelling: Necessary or Neccessary?", a: "necessary", type: "input" },
+                { q: "Verb in: 'The cat slept.'", a: "slept", type: "input" },
+                { q: "What is a homophone?", o: ["Same meaning", "Same sound", "Same spelling"], a: 1, type: "mcq" },
+                { q: "Subject: 'Rishika reads a book.'", a: "Rishika", type: "input" },
+                { q: "Showing possession uses the...", a: "apostrophe", type: "input" },
+                { q: "Opposite of 'optimistic'?", a: "pessimistic", type: "input" },
+                { q: "Which is a pronoun?", o: ["House", "He", "Heavy"], a: 1, type: "mcq" },
+                { q: "Person who writes books?", a: "author", type: "input" },
+                { q: "Plural of 'Child'?", a: "children", type: "input" },
+                { q: "Synonym for 'huge'?", a: "enormous", type: "input" },
+                { q: "Word with a silent 'w'?", a: "write", type: "input" },
+                { q: "Prefix for 'happy' meaning not?", a: "un", type: "input" },
+                { q: "Identify adjective: 'Cold snow'", a: "cold", type: "input" },
+                { q: "Antonym of 'Easy'?", a: "difficult", type: "input" },
+                { q: "Suffix for 'educate' to make it a noun?", a: "ion", type: "input" },
+                { q: "Fix: 'Definitly'", a: "definitely", type: "input" },
+                { q: "Past of 'eat'?", a: "ate", type: "input" },
+                { q: "A group of words with a verb?", a: "sentence", type: "input" },
+                { q: "Which is a preposition?", o: ["Under", "Fast", "The"], a: 0, type: "mcq" },
+                { q: "Fix: 'Seprate'", a: "separate", type: "input" },
+                { q: "Opposite of 'loud'?", a: "quiet", type: "input" },
+                { q: "The '...' is a long pause in a sentence.", a: "semicolon", type: "input" },
+                { q: "Synonym for 'smart'?", a: "intelligent", type: "input" }
+            ]
+        };
+
+        // State Management
+        let currentUser = null;
+        let activeTest = [];
+        let currentIdx = 0;
+        let responses = [];
+        let timeLeft = 1800; // 30 minutes in seconds
+        let timerInt = null;
+
+        // Login Handler (Defined explicitly for reliable call)
+        function handleLogin(event) {
+            if (event) event.preventDefault();
+            
+            const nameInput = document.getElementById('login-name');
+            const passInput = document.getElementById('login-pass');
+            const errorDiv = document.getElementById('login-error');
+            
+            const name = nameInput.value.trim();
+            const pass = passInput.value;
+
+            // Check if user exists and password matches
+            if (USERS[name] && USERS[name].pass === pass) {
+                currentUser = { name, level: USERS[name].level };
+                
+                // Switch Screens
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app-screen').classList.remove('hidden');
+                
+                // Update Personal Info
+                document.getElementById('display-user-name').innerText = "Welcome, " + name;
+                document.getElementById('display-user-level').innerText = "LEVEL: " + currentUser.level.toUpperCase();
+                
+                errorDiv.classList.add('hidden');
+            } else {
+                errorDiv.classList.remove('hidden');
+            }
+        }
+
+        function startTest(subject) {
+            const key = currentUser.level + subject;
+            const fullBank = banks[key] || [];
+            
+            // Randomly select 30 unique questions
+            activeTest = [...fullBank]
+                .sort(() => 0.5 - Math.random())
+                .slice(0, 30);
+            
+            currentIdx = 0;
+            responses = [];
+            timeLeft = 1800; // 30 mins
+
+            // UI Transitions
+            document.getElementById('subject-selection').classList.add('hidden');
+            document.getElementById('subject-header').classList.add('hidden');
+            document.getElementById('quiz-header').classList.remove('hidden');
+            document.getElementById('quiz-engine').classList.remove('hidden');
+            
+            startTimer();
+            renderQuestion();
+        }
+
+        function startTimer() {
+            if (timerInt) clearInterval(timerInt);
+            const display = document.getElementById('timer-display');
+            
+            timerInt = setInterval(() => {
+                timeLeft--;
+                const m = Math.floor(timeLeft / 60);
+                const s = timeLeft % 60;
+                display.innerText = `${m}:${s.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0) {
+                    finish();
+                }
+            }, 1000);
+        }
+
+        function renderQuestion() {
+            const q = activeTest[currentIdx];
+            const inputUI = document.getElementById('input-ui');
+            const mcqUI = document.getElementById('mcq-ui');
+            const qText = document.getElementById('question-text');
+            const qCount = document.getElementById('q-counter');
+            const prog = document.getElementById('progress-fill');
+            
+            qText.innerText = `"${q.q}"`;
+            qCount.innerText = `Q ${currentIdx + 1}/${activeTest.length}`;
+            prog.style.width = `${((currentIdx + 1) / activeTest.length) * 100}%`;
+
+            inputUI.classList.add('hidden');
+            mcqUI.classList.add('hidden');
+            mcqUI.innerHTML = '';
+
+            if (q.type === 'input') {
+                inputUI.classList.remove('hidden');
+                const inp = document.getElementById('answer-input');
+                inp.value = '';
+                inp.focus();
+                // Override existing keydown to ensure it works
+                inp.onkeydown = (e) => { if(e.key === 'Enter') submitAnswer(); };
+            } else {
+                mcqUI.classList.remove('hidden');
+                q.o.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = "p-5 text-left rounded-2xl border-2 border-slate-100 hover:border-indigo-500 hover:bg-indigo-50 font-black text-slate-600 transition-all";
+                    btn.innerHTML = `<span class="text-indigo-200 mr-2">${String.fromCharCode(65+idx)}</span> ${opt}`;
+                    btn.onclick = () => submitAnswer(opt);
+                    mcqUI.appendChild(btn);
+                });
+            }
+        }
+
+        function submitAnswer(val) {
+            const q = activeTest[currentIdx];
+            const userInp = val || document.getElementById('answer-input').value;
+            const correct = q.type === 'mcq' ? q.o[q.a] : q.a;
+            
+            responses.push({
+                q: q.q,
+                user: userInp,
+                correct: correct,
+                isCorrect: userInp.trim().toLowerCase() === correct.toLowerCase()
+            });
+
+            if (currentIdx < activeTest.length - 1) {
+                currentIdx++;
+                renderQuestion();
+            } else {
+                finish();
+            }
+        }
+
+        function finish() {
+            if (timerInt) clearInterval(timerInt);
+            document.getElementById('quiz-header').classList.add('hidden');
+            document.getElementById('quiz-engine').classList.add('hidden');
+            document.getElementById('header-bg').classList.replace('bg-indigo-600', 'bg-slate-800');
+            document.getElementById('result-screen').classList.remove('hidden');
+            
+            const score = responses.filter(r => r.isCorrect).length;
+            document.getElementById('score-text').innerText = `${score}/${activeTest.length}`;
+            document.getElementById('percentage-text').innerText = `${Math.round((score/activeTest.length)*100)}% GRADE`;
+        }
+
+        function showReview() {
+            document.getElementById('result-screen').classList.add('hidden');
+            const screen = document.getElementById('review-screen');
+            const list = document.getElementById('review-list');
+            screen.classList.remove('hidden');
+            
+            list.innerHTML = '';
+            responses.forEach((res, i) => {
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-2xl border-2 ${res.isCorrect ? 'bg-green-50 border-green-100' : 'bg-red-50 border-red-100'}`;
+                card.innerHTML = `
+                    <p class="font-bold text-slate-800">${res.q}</p>
+                    <div class="flex gap-4 mt-2 text-xs">
+                        <div><span class="text-slate-400 block text-[9px] uppercase font-black">Yours</span><span class="font-bold">${res.user || 'Skipped'}</span></div>
+                        ${!res.isCorrect ? `<div><span class="text-slate-400 block text-[9px] uppercase font-black">Correct</span><span class="font-bold text-green-600">${res.correct}</span></div>` : ''}
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>
